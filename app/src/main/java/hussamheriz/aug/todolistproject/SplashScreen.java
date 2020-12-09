@@ -20,7 +20,7 @@ public class SplashScreen extends AppCompatActivity {
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SplashScreen.this, MainActivity.class);
+                Intent intent = new Intent(SplashScreen.this, SignUpActivity.class);
                 startActivity(intent);
             }
         });

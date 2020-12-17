@@ -22,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="your email address"
+        android:id="@+id/email"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
         android:background="@drawable/rounded_edit_text"
@@ -35,6 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
+        android:id="@+id/password"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
         android:background="@drawable/rounded_edit_text"
@@ -46,11 +48,13 @@
         />
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Forgot your password?"
+        android:id="@+id/forgot_password"
         android:textColor="@color/white"
         android:textAlignment="textEnd"
+        android:layout_gravity="end"
         android:layout_marginHorizontal="25dp"/>
 
     <View
@@ -71,6 +75,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:id="@+id/login"
             android:background="@android:color/transparent"
             android:paddingHorizontal="25dp"
             android:paddingVertical="10dp"
@@ -99,11 +104,12 @@
             android:textAlignment="center"/>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create your profile"
-            android:textColor="@color/white"
-            android:textAlignment="center"/>
+            android:id="@+id/register"
+            android:layout_gravity="center"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

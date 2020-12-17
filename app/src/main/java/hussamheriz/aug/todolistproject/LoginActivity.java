@@ -32,6 +32,9 @@ public class LoginActivity extends AppCompatActivity {
                 String emailStr = email.getText().toString();
                 String passwordStr = password.getText().toString();
                 Toast.makeText(LoginActivity.this, emailStr+" "+passwordStr, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(LoginActivity.this, CategoriesActivity.class);
+                startActivity(intent);
             }
         });
 

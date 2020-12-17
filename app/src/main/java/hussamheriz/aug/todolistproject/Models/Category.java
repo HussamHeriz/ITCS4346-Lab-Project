@@ -1,0 +1,29 @@
+package hussamheriz.aug.todolistproject.Models;
+
+public class Category {
+
+    private String name;
+    private int numOfTasks;
+
+    public Category(String name, int numOfTasks) {
+        this.name = name;
+        this.numOfTasks = numOfTasks;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getNumOfTasks() {
+        return numOfTasks;
+    }
+
+    public void setNumOfTasks(int numOfTasks) {
+        this.numOfTasks = numOfTasks;
+    }
+
+}

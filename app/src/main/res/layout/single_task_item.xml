@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -9,7 +9,7 @@
     android:layout_marginBottom="10dp"
     android:orientation="horizontal">
 
-    <CheckBox android:layout_width="match_parent"
+    <CheckBox android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Meeting with client"
         android:id="@+id/checkbox"
@@ -19,4 +19,16 @@
         android:textSize="18sp"
         android:button="@drawable/checkbox_icon" />
 
-</LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="10dp"
+        android:background="#F56785"
+        android:padding="5dp"
+        android:visibility="gone"
+        android:id="@+id/category"
+        android:textColor="#fff"
+        android:text="category" />
+
+</FrameLayout>

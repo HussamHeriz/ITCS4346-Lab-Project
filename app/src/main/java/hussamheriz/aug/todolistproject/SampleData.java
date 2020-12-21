@@ -35,7 +35,16 @@ public class SampleData {
                         false
                 ),
                 new Task(1,
-                        "Meeting with client",
+                        "Scrum Meeting",
+                        "02 October 2018, 10:00",
+                        "Have to meet him because I want to show him my latest app design in person.\nAlso need to ask for advice on these:\n" +
+                                "- style\n" +
+                                "- interaction\n" +
+                                "- copy",
+                        true
+                ),
+                new Task(2,
+                        "Good Meeting",
                         "02 October 2018, 10:00",
                         "Have to meet him because I want to show him my latest app design in person.\nAlso need to ask for advice on these:\n" +
                                 "- style\n" +

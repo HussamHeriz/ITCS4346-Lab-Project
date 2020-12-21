@@ -1,6 +1,7 @@
 package hussamheriz.aug.todolistproject.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,8 +10,12 @@ import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import hussamheriz.aug.todolistproject.CategoriesActivity;
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.R;
+import hussamheriz.aug.todolistproject.TasksActivity;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.ViewHolder> {
 
@@ -45,7 +50,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.single_task_item, viewGroup, false);
+                .inflate(R.layout.single_category_item, viewGroup, false);
 
 
         return new ViewHolder(view);
@@ -59,12 +64,14 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, categories[position].getName(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(context, TasksActivity.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                // Toast.makeText(context, categories[position].getName(), Toast.LENGTH_SHORT).show();
             }
         });
         name.setText(categories[position].getName());
         numOfTasks.setText(categories[position].getNumOfTasks()+" tasks");
-
 
     }
 

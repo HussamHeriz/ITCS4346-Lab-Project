@@ -21,11 +21,7 @@ public class CategoriesActivity extends AppCompatActivity {
         categories_rv = findViewById(R.id.categories_rv);
         categories_rv.setLayoutManager(new LinearLayoutManager(this));
 
-        Category[] categories = new Category[4];
-        categories[0] = new Category("Home", 3);
-        categories[1] = new Category("Personal", 3);
-        categories[2] = new Category("Work", 3);
-        categories[3] = new Category("University", 3);
+        Category[] categories = SampleData.getCategories();
 
         CategoriesAdapter categoriesAdapter = new CategoriesAdapter(getApplicationContext(), categories);
         categories_rv.setAdapter(categoriesAdapter);

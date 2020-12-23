@@ -1,5 +1,7 @@
 package hussamheriz.aug.todolistproject;
 
+import java.util.ArrayList;
+
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
 
@@ -53,5 +55,22 @@ public class SampleData {
                         true
                 ),
         };
+    }
+
+    public static Task[] getSearchTasks(String search) {
+
+        Task[] allTasks = SampleData.getTasks();
+        ArrayList<Task> tasksMatchSearch = new ArrayList<>();
+        for(Task task: allTasks) {
+            if(task.getTitle().toLowerCase().contains(search)) {
+                tasksMatchSearch.add(task);
+            }
+        }
+
+        Task[] tasksMatchSearchArray = new Task[tasksMatchSearch.size()];
+        tasksMatchSearch.toArray(tasksMatchSearchArray);
+
+        return tasksMatchSearchArray;
+
     }
 }

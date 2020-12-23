@@ -4,12 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -46,20 +49,15 @@ public class TasksActivity extends AppCompatActivity {
         tasks_rv.setAdapter(tasksAdapter);
 
         /* Search */
-
         search.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 boolean isEmptySearch = search.getText().toString().isEmpty();
-
                 showOrHideViews(isEmptySearch);
-                Task[] tasksMatchSearch = getSearchTasks();
+                Task[] tasksMatchSearch = SampleData.getSearchTasks(search.getText().toString().toLowerCase());
                 TasksAdapter tasksMatchSearchAdapter = new TasksAdapter(getApplicationContext(), tasksMatchSearch, !isEmptySearch);
                 tasks_rv.setAdapter(tasksMatchSearchAdapter);
-
-
             }
 
             @Override
@@ -68,24 +66,30 @@ public class TasksActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) { }
         });
-    }
 
-    private Task[] getSearchTasks() {
+        /* create a new category */
+        create.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-        Task[] allTasks = SampleData.getTasks();
-        ArrayList<Task> tasksMatchSearch = new ArrayList<>();
-        for(Task task: allTasks) {
-            String newSearch = search.getText().toString().toLowerCase();
-            if(task.getTitle().toLowerCase().contains(newSearch)) {
-                tasksMatchSearch.add(task);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if( -1 != s.toString().indexOf("\n") ){
+                    create.clearFocus();
+                    Toast.makeText(TasksActivity.this, "Entered a new Line", Toast.LENGTH_SHORT).show();
+                    create.setText("");
+                    // Hide KeyBoard
+                    InputMethodManager imm = null;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                        imm = (InputMethodManager) TasksActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    }
+                    imm.hideSoftInputFromWindow(create.getWindowToken(),0);
+                }
             }
-        }
-
-        Task[] tasksMatchSearchArray = new Task[tasksMatchSearch.size()];
-        tasksMatchSearch.toArray(tasksMatchSearchArray);
-
-        return tasksMatchSearchArray;
-
+        });
     }
 
     private void showOrHideViews(boolean isShown) {

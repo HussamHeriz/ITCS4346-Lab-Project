@@ -1,6 +1,7 @@
 package hussamheriz.aug.todolistproject.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,9 @@ import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
 import hussamheriz.aug.todolistproject.R;
 import hussamheriz.aug.todolistproject.SampleData;
+import hussamheriz.aug.todolistproject.SingleTask;
+
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> {
 
@@ -26,11 +30,13 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView category;
+        private final TextView task;
         private final CheckBox checkbox;
 
         public ViewHolder(View view) {
             super(view);
             checkbox = view.findViewById(R.id.checkbox);
+            task = view.findViewById(R.id.task);
             category = view.findViewById(R.id.category);
         }
 
@@ -40,6 +46,10 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
         public TextView getCategory() {
             return category;
+        }
+
+        public TextView getTask() {
+            return task;
         }
     }
 
@@ -60,21 +70,25 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
 
+        TextView task = viewHolder.getTask();
         CheckBox checkbox = viewHolder.getCheckbox();
-        checkbox.setText(tasks[position].getTitle());
-
         TextView category = viewHolder.getCategory();
+
+        task.setText(tasks[position].getTitle());
+
+        // For search results
         if(withCategory) {
             int categoryId = tasks[position].getCategoryId();
             String categoryStr = SampleData.getCategories()[categoryId].getName();
             category.setText(categoryStr);
             category.setVisibility(View.VISIBLE);
         } else {
+            // For list viewing without search
             category.setVisibility(View.GONE);
         }
 
         if(tasks[position].isDone()) {
-            checkbox.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            task.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             checkbox.setChecked(true);
         }
 
@@ -82,10 +96,19 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) {
-                    checkbox.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    task.setPaintFlags(checkbox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 } else {
-                    checkbox.setPaintFlags(checkbox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    task.setPaintFlags(checkbox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 }
+            }
+        });
+
+        task.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, SingleTask.class);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
             }
         });
 

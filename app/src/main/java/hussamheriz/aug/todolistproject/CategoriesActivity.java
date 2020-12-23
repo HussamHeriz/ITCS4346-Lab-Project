@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -19,6 +20,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import hussamheriz.aug.todolistproject.Adapters.CategoriesAdapter;
 import hussamheriz.aug.todolistproject.Adapters.TasksAdapter;
 import hussamheriz.aug.todolistproject.Models.Category;
@@ -28,7 +31,7 @@ public class CategoriesActivity extends AppCompatActivity {
 
     EditText create,search;
     RecyclerView categories_rv;
-    TextView lists;
+    TextView lists, logout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class CategoriesActivity extends AppCompatActivity {
         categories_rv = findViewById(R.id.categories_rv);
         lists = findViewById(R.id.lists);
         search = findViewById(R.id.search);
+        logout = findViewById(R.id.logout);
 
         /* Recycler View */
         categories_rv.setLayoutManager(new LinearLayoutManager(this));
@@ -95,6 +99,16 @@ public class CategoriesActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) { }
         });
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(CategoriesActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void showOrHideViews(boolean isShown) {

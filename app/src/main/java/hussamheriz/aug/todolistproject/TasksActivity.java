@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import java.util.Date;
 
 import hussamheriz.aug.todolistproject.Adapters.CategoriesAdapter;
 import hussamheriz.aug.todolistproject.Adapters.TasksAdapter;
+import hussamheriz.aug.todolistproject.Helpers.ProgressDialogGenerator;
 import hussamheriz.aug.todolistproject.Helpers.TasksSearch;
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
@@ -46,6 +48,7 @@ public class TasksActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     String categoryId;
     ImageButton back;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,7 +136,7 @@ public class TasksActivity extends AppCompatActivity {
                     imm.hideSoftInputFromWindow(create.getWindowToken(),0);
 
                     // Current Date
-                    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
                     String dateAndTime = formatter.format(new Date());
 
                     Task task = new Task(categoryId, newTask, dateAndTime);
@@ -219,6 +222,8 @@ public class TasksActivity extends AppCompatActivity {
 
     private void getTasks() {
 
+        progressDialog = ProgressDialogGenerator.showLoadingDialog(TasksActivity.this);
+
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         database.getReference("users").child(uid).child("tasks").orderByChild("categoryId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
@@ -233,6 +238,9 @@ public class TasksActivity extends AppCompatActivity {
                 }
                 TasksAdapter tasksAdapter = new TasksAdapter(getApplicationContext(), tasks, false);
                 tasks_rv.setAdapter(tasksAdapter);
+
+                progressDialog.hide();
+                progressDialog.dismiss();
             }
 
             @Override

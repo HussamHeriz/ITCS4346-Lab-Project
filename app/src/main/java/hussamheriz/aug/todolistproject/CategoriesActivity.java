@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import hussamheriz.aug.todolistproject.Adapters.CategoriesAdapter;
 import hussamheriz.aug.todolistproject.Adapters.TasksAdapter;
+import hussamheriz.aug.todolistproject.Helpers.ProgressDialogGenerator;
 import hussamheriz.aug.todolistproject.Helpers.TasksSearch;
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
@@ -37,6 +39,7 @@ public class CategoriesActivity extends AppCompatActivity {
     Category[] categories;
     CategoriesAdapter categoriesAdapter;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +146,8 @@ public class CategoriesActivity extends AppCompatActivity {
 
     private void getCategories() {
 
+        progressDialog = ProgressDialogGenerator.showLoadingDialog(CategoriesActivity.this);
+
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         database.getReference("users").child(uid).child("categories").addValueEventListener(new ValueEventListener() {
             @Override
@@ -156,6 +161,9 @@ public class CategoriesActivity extends AppCompatActivity {
                 }
                 categoriesAdapter = new CategoriesAdapter(getApplicationContext(), categories);
                 categories_rv.setAdapter(categoriesAdapter);
+
+                progressDialog.hide();
+                progressDialog.dismiss();
             }
 
             @Override

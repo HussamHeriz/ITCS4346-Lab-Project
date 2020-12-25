@@ -15,7 +15,7 @@ public class Task {
         this.categoryId = categoryId;
         this.title = title;
         this.date = date;
-        this.description = "";
+        this.description = "No Description";
         this.isDone = false;
     }
 

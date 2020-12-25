@@ -113,6 +113,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
                 } else {
                     task.setPaintFlags(checkbox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 }
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                FirebaseDatabase.getInstance().getReference("users/"+uid+"/tasks/"+tasks[position].getTaskId()+"/done")
+                        .setValue(isChecked);
             }
         });
 
@@ -120,6 +123,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, SingleTask.class);
+                intent.putExtra("taskId",tasks[position].getTaskId());
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }

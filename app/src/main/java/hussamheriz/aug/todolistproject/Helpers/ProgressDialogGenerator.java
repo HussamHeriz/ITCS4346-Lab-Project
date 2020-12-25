@@ -17,7 +17,7 @@ public class ProgressDialogGenerator {
         if (progressDialog.getWindow() != null) {
             progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
-        progressDialog.setCanceledOnTouchOutside(false);
+
         return progressDialog;
 
     }

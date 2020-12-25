@@ -1,32 +1,51 @@
 package hussamheriz.aug.todolistproject;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 
 import hussamheriz.aug.todolistproject.Adapters.CategoriesAdapter;
 import hussamheriz.aug.todolistproject.Adapters.TasksAdapter;
+import hussamheriz.aug.todolistproject.Helpers.TasksSearch;
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
 
 public class TasksActivity extends AppCompatActivity {
 
-    TextView category,delete;
+    TextView category,delete,logout;
     RecyclerView tasks_rv;
     EditText search, create;
     String mainCategoryText;
+    Task[] tasks;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    String categoryId;
+    ImageButton back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +57,28 @@ public class TasksActivity extends AppCompatActivity {
         category = findViewById(R.id.category);
         delete = findViewById(R.id.delete);
         create = findViewById(R.id.create);
+        back = findViewById(R.id.back);
+        logout = findViewById(R.id.logout);
 
-        /* Maintain Main Category to Retrieve after search */
-        mainCategoryText = category.getText().toString();
+        categoryId = getIntent().getStringExtra("categoryId");
+
+        /* retrieve category name */
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        database.getReference("users/"+uid+"/categories/"+categoryId+"/name").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String categoryName = snapshot.getValue().toString();
+                mainCategoryText = categoryName;
+                category.setText(categoryName+" List");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
 
         /* Tasks RecyclerView */
         tasks_rv.setLayoutManager(new LinearLayoutManager(this));
-        Task[] tasks = SampleData.getTasks();
-        TasksAdapter tasksAdapter = new TasksAdapter(getApplicationContext(), tasks, false);
-        tasks_rv.setAdapter(tasksAdapter);
+        getTasks();
 
         /* Search */
         search.addTextChangedListener(new TextWatcher() {
@@ -55,9 +87,15 @@ public class TasksActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean isEmptySearch = search.getText().toString().isEmpty();
                 showOrHideViews(isEmptySearch);
-                Task[] tasksMatchSearch = SampleData.getSearchTasks(search.getText().toString().toLowerCase());
-                TasksAdapter tasksMatchSearchAdapter = new TasksAdapter(getApplicationContext(), tasksMatchSearch, !isEmptySearch);
-                tasks_rv.setAdapter(tasksMatchSearchAdapter);
+
+                if(!isEmptySearch) {
+                    Task[] tasksMatchSearch = TasksSearch.getSearchTasks(search.getText().toString().toLowerCase());
+                    TasksAdapter tasksMatchSearchAdapter = new TasksAdapter(getApplicationContext(), tasksMatchSearch, true);
+                    tasks_rv.setAdapter(tasksMatchSearchAdapter);
+                } else {
+                    getTasks();
+                }
+
             }
 
             @Override
@@ -69,6 +107,9 @@ public class TasksActivity extends AppCompatActivity {
 
         /* create a new category */
         create.addTextChangedListener(new TextWatcher() {
+
+            DatabaseReference mRef;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -78,8 +119,11 @@ public class TasksActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if( -1 != s.toString().indexOf("\n") ){
+
+                    String newTask = s.toString();
+                    newTask = newTask.substring(0, newTask.length() - 1);
+
                     create.clearFocus();
-                    Toast.makeText(TasksActivity.this, "Entered a new Line", Toast.LENGTH_SHORT).show();
                     create.setText("");
                     // Hide KeyBoard
                     InputMethodManager imm = null;
@@ -87,9 +131,77 @@ public class TasksActivity extends AppCompatActivity {
                         imm = (InputMethodManager) TasksActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
                     }
                     imm.hideSoftInputFromWindow(create.getWindowToken(),0);
+
+                    // Current Date
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                    String dateAndTime = formatter.format(new Date());
+
+                    Task task = new Task(categoryId, newTask, dateAndTime);
+
+                    // add new task to firebase
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    mRef = FirebaseDatabase.getInstance().getReference("users/"+uid+"/tasks");
+                    String taskId = mRef.push().getKey();
+                    task.setTaskId(taskId);
+                    mRef.child(taskId).setValue(task);
+
+                    // update num of tasks for category
+                    mRef = FirebaseDatabase.getInstance().getReference("users/"+uid+"/categories/"+categoryId+"/numOfTasks");
+                    mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            int num = Integer.parseInt(snapshot.getValue().toString());
+                            mRef.setValue(num + 1);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {}
+                    });
+
+                    Toast.makeText(TasksActivity.this, "new task added successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                database.getReference("users/"+uid+"/categories/"+categoryId).removeValue();
+                database.getReference("users/"+uid+"/tasks").orderByChild("categoryId").equalTo(categoryId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            dataSnapshot.getRef().removeValue();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
+                Intent intent = new Intent(TasksActivity.this, CategoriesActivity.class);
+                startActivity(intent);
+                Toast.makeText(TasksActivity.this, "Removed successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        /* logout */
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(TasksActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void showOrHideViews(boolean isShown) {
@@ -103,5 +215,29 @@ public class TasksActivity extends AppCompatActivity {
         }
         delete.setVisibility(showOrHide);
         create.setVisibility(showOrHide);
+    }
+
+    private void getTasks() {
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        database.getReference("users").child(uid).child("tasks").orderByChild("categoryId").equalTo(categoryId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tasks = new Task[(int) snapshot.getChildrenCount()];
+                int i = 0;
+                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+                    Task task = dataSnapshot.getValue(Task.class);
+                    tasks[i] = task;
+                    ++i;
+                }
+                TasksAdapter tasksAdapter = new TasksAdapter(getApplicationContext(), tasks, false);
+                tasks_rv.setAdapter(tasksAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
     }
 }

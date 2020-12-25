@@ -1,29 +1,31 @@
 package hussamheriz.aug.todolistproject;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import hussamheriz.aug.todolistproject.Adapters.CategoriesAdapter;
 import hussamheriz.aug.todolistproject.Adapters.TasksAdapter;
+import hussamheriz.aug.todolistproject.Helpers.TasksSearch;
 import hussamheriz.aug.todolistproject.Models.Category;
 import hussamheriz.aug.todolistproject.Models.Task;
 
@@ -32,12 +34,16 @@ public class CategoriesActivity extends AppCompatActivity {
     EditText create,search;
     RecyclerView categories_rv;
     TextView lists, logout;
+    Category[] categories;
+    CategoriesAdapter categoriesAdapter;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_categories);
 
+        TasksSearch tasksSearch = new TasksSearch();
         create = findViewById(R.id.create);
         categories_rv = findViewById(R.id.categories_rv);
         lists = findViewById(R.id.lists);
@@ -46,9 +52,8 @@ public class CategoriesActivity extends AppCompatActivity {
 
         /* Recycler View */
         categories_rv.setLayoutManager(new LinearLayoutManager(this));
-        Category[] categories = SampleData.getCategories();
-        CategoriesAdapter categoriesAdapter = new CategoriesAdapter(getApplicationContext(), categories);
-        categories_rv.setAdapter(categoriesAdapter);
+        getCategories();
+
 
         /* create a new category */
         create.addTextChangedListener(new TextWatcher() {
@@ -61,15 +66,30 @@ public class CategoriesActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if( -1 != s.toString().indexOf("\n") ){
+
+                    String newCategory = create.getText().toString();
+                    newCategory = newCategory.substring(0,newCategory.length() - 1);
                     create.clearFocus();
-                    Toast.makeText(CategoriesActivity.this, "Entered a new Line", Toast.LENGTH_SHORT).show();
                     create.setText("");
+
                     // Hide KeyBoard
                     InputMethodManager imm = null;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                         imm = (InputMethodManager) CategoriesActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
                     }
                     imm.hideSoftInputFromWindow(create.getWindowToken(),0);
+
+                    Category category = new Category(newCategory);
+
+                    // add new category to firebase
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users/"+uid+"/categories");
+                    String categoryId = mRef.push().getKey();
+                    category.setCategoryId(categoryId);
+                    mRef.child(categoryId).setValue(category);
+
+                    Toast.makeText(CategoriesActivity.this, "Added Successfully", Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
@@ -79,16 +99,15 @@ public class CategoriesActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
                 boolean isEmptySearch = search.getText().toString().isEmpty();
                 showOrHideViews(isEmptySearch);
                 if(!isEmptySearch){
-                    Task[] tasksMatchSearch = SampleData.getSearchTasks(search.getText().toString().toLowerCase());
-                    TasksAdapter tasksMatchSearchAdapter = new TasksAdapter(getApplicationContext(), tasksMatchSearch, !isEmptySearch);
+                    Task[] tasksMatchSearch = TasksSearch.getSearchTasks(search.getText().toString().toLowerCase());
+                    TasksAdapter tasksMatchSearchAdapter = new TasksAdapter(getApplicationContext(), tasksMatchSearch, true);
                     categories_rv.setAdapter(tasksMatchSearchAdapter);
                 } else {
-                    Category[] categories = SampleData.getCategories();
-                    CategoriesAdapter categoriesAdapter = new CategoriesAdapter(getApplicationContext(), categories);
-                    categories_rv.setAdapter(categoriesAdapter);
+                    getCategories();
                 }
 
             }
@@ -100,6 +119,7 @@ public class CategoriesActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) { }
         });
 
+        /* logout */
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,5 +139,28 @@ public class CategoriesActivity extends AppCompatActivity {
             lists.setText("Results:");
             create.setVisibility(View.GONE);
         }
+    }
+
+    private void getCategories() {
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        database.getReference("users").child(uid).child("categories").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                categories = new Category[(int) snapshot.getChildrenCount()];
+                int i = 0;
+                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+                    Category category = dataSnapshot.getValue(Category.class);
+                    categories[i] = category;
+                    ++i;
+                }
+                categoriesAdapter = new CategoriesAdapter(getApplicationContext(), categories);
+                categories_rv.setAdapter(categoriesAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
+
     }
 }

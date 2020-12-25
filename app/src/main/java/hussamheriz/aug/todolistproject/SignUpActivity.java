@@ -17,12 +17,17 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 import hussamheriz.aug.todolistproject.Helpers.ProgressDialogGenerator;
 
 public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance();
     EditText name, password, email;
     Button register;
     TextView login;
@@ -61,7 +66,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
                 if(flag){
                     progressDialog = ProgressDialogGenerator.showLoadingDialog(SignUpActivity.this);
-                    signUp(emailStr, passwordStr);
+                    signUp(emailStr, passwordStr, nameStr);
                 }
 
             }
@@ -77,7 +82,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     }
 
-    private void signUp(String email, String password) {
+    private void signUp(String email, String password, String name) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -86,6 +91,11 @@ public class SignUpActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Toast.makeText(SignUpActivity.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
                             FirebaseUser user = mAuth.getCurrentUser();
+                            String uid = user.getUid();
+                            DatabaseReference usersReference = database.getReference("users");
+                            HashMap<String, String> map = new HashMap<>();
+                            map.put("name", name);
+                            usersReference.child(uid).setValue(map);
                             Intent intent = new Intent(SignUpActivity.this,CategoriesActivity.class);
                             startActivity(intent);
                         } else {

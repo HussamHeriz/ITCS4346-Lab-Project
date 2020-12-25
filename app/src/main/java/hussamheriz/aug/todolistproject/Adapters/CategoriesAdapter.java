@@ -65,9 +65,9 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, TasksActivity.class);
+                intent.putExtra("categoryId",categories[position].getCategoryId());
                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
-                // Toast.makeText(context, categories[position].getName(), Toast.LENGTH_SHORT).show();
             }
         });
         name.setText(categories[position].getName());
@@ -77,6 +77,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
 
     @Override
     public int getItemCount() {
+        if(categories == null) return 0;
         return categories.length;
     }
 }

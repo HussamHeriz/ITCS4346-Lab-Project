@@ -9,14 +9,18 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import hussamheriz.aug.todolistproject.Models.Category;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import hussamheriz.aug.todolistproject.Models.Task;
 import hussamheriz.aug.todolistproject.R;
-import hussamheriz.aug.todolistproject.SampleData;
 import hussamheriz.aug.todolistproject.SingleTask;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -78,10 +82,19 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
         // For search results
         if(withCategory) {
-            int categoryId = tasks[position].getCategoryId();
-            String categoryStr = SampleData.getCategories()[categoryId].getName();
-            category.setText(categoryStr);
-            category.setVisibility(View.VISIBLE);
+            String categoryId = tasks[position].getCategoryId();
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            FirebaseDatabase.getInstance().getReference("users/"+uid+"/categories/"+categoryId+"/name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String categoryStr = snapshot.getValue().toString();
+                    category.setText(categoryStr);
+                    category.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {}
+            });
         } else {
             // For list viewing without search
             category.setVisibility(View.GONE);
@@ -116,6 +129,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
+        if(tasks == null) return 0;
         return tasks.length;
     }
 }

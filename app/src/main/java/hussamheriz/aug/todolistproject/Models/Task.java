@@ -2,25 +2,28 @@ package hussamheriz.aug.todolistproject.Models;
 
 public class Task {
 
-    private int categoryId;
+    private String taskId;
     private String title;
     private String date;
     private String description;
     private boolean isDone;
+    private String categoryId;
 
-    public Task(int categoryId, String title, String date, String description, boolean isDone) {
+    public Task() {}
+
+    public Task(String categoryId, String title, String date) {
         this.categoryId = categoryId;
         this.title = title;
         this.date = date;
-        this.description = description;
-        this.isDone = isDone;
+        this.description = "";
+        this.isDone = false;
     }
 
-    public int getCategoryId() {
+    public String getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(int categoryId) {
+    public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -54,5 +57,13 @@ public class Task {
 
     public void setDone(boolean done) {
         isDone = done;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }

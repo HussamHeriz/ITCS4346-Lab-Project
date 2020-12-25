@@ -2,12 +2,15 @@ package hussamheriz.aug.todolistproject.Models;
 
 public class Category {
 
+    private String categoryId;
     private String name;
     private int numOfTasks;
 
-    public Category(String name, int numOfTasks) {
+    public Category() {}
+
+    public Category(String name) {
         this.name = name;
-        this.numOfTasks = numOfTasks;
+        this.numOfTasks = 0;
     }
 
     public String getName() {
@@ -26,4 +29,11 @@ public class Category {
         this.numOfTasks = numOfTasks;
     }
 
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
 }

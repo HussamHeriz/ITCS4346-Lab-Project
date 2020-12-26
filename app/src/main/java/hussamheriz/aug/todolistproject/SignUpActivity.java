@@ -77,6 +77,7 @@ public class SignUpActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -98,6 +99,7 @@ public class SignUpActivity extends AppCompatActivity {
                             usersReference.child(uid).setValue(map);
                             Intent intent = new Intent(SignUpActivity.this,CategoriesActivity.class);
                             startActivity(intent);
+                            finish();
                         } else {
                             Toast.makeText(SignUpActivity.this, task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
@@ -113,6 +115,7 @@ public class SignUpActivity extends AppCompatActivity {
         if(currentUser != null) {
             Intent intent = new Intent(SignUpActivity.this,CategoriesActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 

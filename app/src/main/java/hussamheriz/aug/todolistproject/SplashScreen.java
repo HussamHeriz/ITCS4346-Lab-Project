@@ -25,6 +25,7 @@ public class SplashScreen extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(SplashScreen.this, SignUpActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -36,6 +37,7 @@ public class SplashScreen extends AppCompatActivity {
         if(currentUser != null) {
             Intent intent = new Intent(SplashScreen.this,CategoriesActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 }

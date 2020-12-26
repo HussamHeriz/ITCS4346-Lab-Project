@@ -202,6 +202,7 @@ public class TasksActivity extends AppCompatActivity {
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(TasksActivity.this, LoginActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 

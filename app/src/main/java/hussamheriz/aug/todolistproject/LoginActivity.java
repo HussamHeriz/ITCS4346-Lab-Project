@@ -70,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -84,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Logged in successfully", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, CategoriesActivity.class);
                             startActivity(intent);
+                            finish();
                         } else {
                             Toast.makeText(LoginActivity.this, "Error: "+task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
@@ -99,6 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         if(currentUser != null) {
             Intent intent = new Intent(LoginActivity.this,CategoriesActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 
